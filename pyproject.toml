@@ -1,0 +1,16 @@
+[project]
+name = "gridfinity-customizer-jp"
+version = "1.2.1"
+description = "実寸mmまたはユニット数＋追加mmと四隅基準点に対応したGridfinity箱・タイル・オープン格子型ベースフレーム生成GUI"
+requires-python = ">=3.10,<3.14"
+dependencies = [
+  "numpy>=1.26,<3",
+  "shapely>=2.1,<3",
+  "trimesh>=4.4,<5",
+]
+
+[project.optional-dependencies]
+step = ["cadquery>=2.4,<3"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]

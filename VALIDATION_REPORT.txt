@@ -1,0 +1,35 @@
+Gridfinity Customizer JP 1.2.1 検証結果
+
+原因
+- v1.2.0のZIP作成処理が、UTF-8の日本語ファイル名をCP437互換文字列へ誤変換した状態で格納していました。
+- ZIPエントリーのUTF-8フラグも立っていなかったため、Windowsで展開するとフォルダー名とファイル名が文字化けしました。
+- BATや説明書本文そのものではなく、主因はZIP内部のパス名でした。
+
+今回の対策
+- ZIP内部のフォルダー名・ファイル名をすべてASCII文字へ統一しました。
+- ルートフォルダー名は Gridfinity_Customizer_JP です。
+- 初回セットアップは setup.bat、通常起動は launch.bat です。
+- GUIと説明書本文は日本語のままです。
+
+文字コード検査
+- ZIP内パス: 全件ASCII
+- BAT: 全件ASCII、CRLF、BOMなし
+- Python / HTML / JSON / TOML / Markdown / TXT: UTF-8
+- HTML: meta charset=UTF-8を明示
+- 文字化け典型文字列の混入: なし
+
+構造・動作検査
+- Python構文検査: 合格
+- JSON構文検査: 合格
+- 軽量プロファイル生成: 合格
+- しっかりプロファイル生成: 合格
+- 四隅のはがれ防止耳: 合格
+- 耳が外形から張り出さないこと: 合格
+- Bambu互換分割3MF: 箱、ベース、セットとも合格
+- STL出力: 合格
+- SciPy / NetworkXなしの標準動作: 合格
+- ZIP CRC検査: 合格
+- ZIPを別フォルダーへ展開後の自己試験: 合格
+
+未検証
+- STEP実出力はCadQueryを標準導入していないため、今回も自動試験対象外です。

@@ -1,0 +1,2 @@
+# Windows batch files must stay ASCII + CRLF exactly (validate_release.py checks this).
+*.bat -text

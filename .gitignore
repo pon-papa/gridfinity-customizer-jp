@@ -1,0 +1,29 @@
+# Python environment and caches
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+build/
+dist/
+*.egg-info/
+
+# Generated models and reports (the app writes these to output/ by default)
+output/
+*.3mf
+*.stl
+*.step
+*.stp
+*.zip
+
+# Sample 3MF files are shipped in the release zip, not in git
+samples/
+
+# Presets saved from the GUI are personal; only the bundled samples are tracked
+presets/*
+!presets/sample_*.json
+
+# Logs and temporary files
+*.log
+logs/
+tmp/
+temp/

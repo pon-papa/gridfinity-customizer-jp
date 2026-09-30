@@ -1,0 +1,29 @@
+{
+  "name": "sample_103x71_left_back",
+  "width_mm": 103.0,
+  "depth_mm": 71.0,
+  "height_mm": 21.0,
+  "anchor": "left_back",
+  "shape_mode": "box",
+  "walls": {
+    "back": true,
+    "right": false,
+    "front": true,
+    "left": false
+  },
+  "clearance_total_mm": 0.4,
+  "wall_thickness_mm": 1.2,
+  "floor_thickness_mm": 1.2,
+  "corner_radius_mm": 1.5,
+  "min_partial_cell_mm": 12.0,
+  "generate_baseplate": true,
+  "export_3mf": true,
+  "export_stl": false,
+  "export_step": false,
+  "output_dir": "output",
+  "dimension_input_mode": "millimeters",
+  "width_units": 2,
+  "width_extra_mm": 19.0,
+  "depth_units": 1,
+  "depth_extra_mm": 29.0
+}

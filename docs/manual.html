@@ -1,0 +1,13 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><title>Gridfinity Customizer JP 1.2.1 使い方説明書</title><style>body{font-family:"Yu Gothic UI","Meiryo",sans-serif;max-width:980px;margin:36px auto;padding:0 24px;line-height:1.75;color:#222}h1{border-bottom:4px solid #444;padding-bottom:10px}h2{margin-top:32px;border-left:7px solid #666;padding-left:12px}h3{margin-top:22px}code{background:#f2f2f2;padding:2px 5px}.box{background:#f6f6f6;border:1px solid #bbb;padding:14px 18px}.warn{background:#fff4d8;border:1px solid #d6a548;padding:14px 18px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #bbb;padding:8px;text-align:left}th{background:#eee}</style></head><body>
+<h1>Gridfinity Customizer JP 1.2.1<br>使い方説明書</h1>
+<h2>1. 起動</h2><ol><li>ZIPを展開します。フォルダー名とファイル名は文字化け防止のため英数字に統一されています。</li><li>初回のみ <code>setup.bat</code> を実行します。</li><li>以後は <code>launch.bat</code> を実行します。</li><li>出力先を指定して［生成スタート］を押します。</li></ol>
+<h2>2. 構造プロファイル</h2><table><tr><th></th><th>軽量・共有シリーズ準拠</th><th>しっかり・v1.1.5</th></tr><tr><td>壁厚</td><td>1.9 mm</td><td>1.2 mm</td></tr><tr><td>床厚</td><td>0.225 mm</td><td>1.2 mm</td></tr><tr><td>角丸</td><td>4.0 mm</td><td>1.5 mm</td></tr><tr><td>ベース</td><td>細枠、高さ4.25 mm</td><td>太枠、高さ4.75 mm</td></tr><tr><td>耳</td><td>標準ON</td><td>標準OFF</td></tr></table><p>軽量版が新しい標準です。しっかり版はv1.1.5の形状をそのまま残しています。［カスタム］では各数値とベース形式を個別に変更できます。</p>
+<h2>3. 寸法</h2><p>実寸mm、または1U＝42 mmとして「ユニット数＋追加mm」を選択します。外周クリアランスは合計寸法から差し引きます。</p><div class="box">例：X＝2U＋29 mm、Y＝4U＋0 mm、クリアランス0.4 mm<br>完成外形＝112.6 × 167.6 mm</div>
+<h2>4. 基準点</h2><p>左奥・右奥・左手前・右手前から選択します。選択した角から42 mm格子を維持し、反対側の端部を部分セルにします。</p>
+<h2>5. 箱と壁</h2><p>奥・右・手前・左の壁を個別にON/OFFできます。全壁OFFは薄床トレーです。「壁なしタイル／かさ上げ台」は指定高さまで中実になります。</p>
+<h2>6. 軽量ベースフレーム</h2><p>全面底板はありません。外周レール、各セルの細い内側レール、上部の嵌合斜面だけで構成します。交点の丸い補強もありません。</p>
+<h3>四隅のはがれ防止耳</h3><p>四隅のセル開口内へL字状のアンカーを初層だけ追加します。外形の外へは張り出しません。標準値は厚さ0.20 mm、幅3.0 mm、長さ13.0 mmです。</p>
+<h2>7. 出力</h2><p>基本は3MFです。箱、ベースフレーム、両者を並べたセットを出力します。STLとSTEPは任意です。セットがプリンタープレートを超える場合は、箱とベースを個別に開いてください。</p>
+<h2>8. 更新と文字コード</h2><p>旧版から更新する場合は、アプリを終了して内容を上書きします。<code>.venv</code>は残し、初回セットアップは再実行しません。旧プリセットはしっかり版として読み込まれます。配布ZIP内のパス名はすべてASCII、BATはASCII・CRLF・BOMなし、Python・HTML・JSON・MarkdownはUTF-8です。</p>
+<h2>9. 実印刷確認</h2><div class="warn">軽量床、部分セル、はがれ防止耳はプリンターとスライス条件の影響を受けます。最初は嵌合、着座、反り、耳の外しやすさを確認してください。</div>
+</body></html>
