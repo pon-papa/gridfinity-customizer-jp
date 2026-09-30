@@ -22,3 +22,25 @@ STEP 出力は任意で、CadQuery（`install_step.bat`）が入っていると�
 
 生成物（`output/` の 3MF / STL / STEP）と見本 3MF（`samples/`）は Git では管理せず、
 配布 ZIP に同梱しています。
+
+## AI・自動化から使う（任意）
+
+**通常の利用には何も追加する必要はありません。**画面（`launch.bat`）と CLI は、
+これまでどおり単体で動きます。ToolDock・MCP・AI は不要です。
+
+AI（MCP クライアント）や自動化から使いたい場合だけ、別プロジェクトの ToolDock が
+次の入口を呼び出します。アプリ本体は ToolDock を読み込みません。
+
+```
+.venv\Scripts\python.exe tooldock_cli.py capabilities         --input-json -
+.venv\Scripts\python.exe tooldock_cli.py generate             --input-json -
+.venv\Scripts\python.exe tooldock_cli.py generate_from_preset --input-json -
+```
+
+- 引数は標準入力の JSON、結果は標準出力に JSON で1行返します
+- できることは `tooldock.tool.json`（ToolDock Connector v1）に書いてあります。
+  このファイルが無くても、画面と CLI の動作には影響しません
+- 生成は画面と同じ処理です。プリセットは読むだけで、同じ名前のファイルは
+  `overwrite` を指定しない限り上書きしません
+
+試験: `.venv\Scripts\python.exe -B tests\test_tooldock_cli.py`
