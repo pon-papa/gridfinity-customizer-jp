@@ -1,0 +1,123 @@
+{
+  "connector_version": 1,
+  "tool_id": "gridfinity-customizer-jp",
+  "name": "Gridfinity Customizer JP",
+  "version": "1.2.1",
+  "api_version": 1,
+  "description": "半端な寸法に対応した Gridfinity の箱・タイル・ベースフレーム（格子枠）を作り、3MF / STL（CadQuery があれば STEP）を書き出すローカルツール。画面と同じ生成処理を使います。",
+  "namespace": "gridfinity",
+  "interface": {
+    "type": "json_cli",
+    "runtime": "venv",
+    "entry": "tooldock_cli.py",
+    "arguments": "json_stdin",
+    "output": "envelope",
+    "progress": "none"
+  },
+  "capabilities": ["gridfinity_box", "gridfinity_tile", "gridfinity_baseplate", "export_3mf", "export_stl", "export_step_optional"],
+  "actions": [
+    {
+      "name": "get_capabilities",
+      "title": "できること",
+      "description": "作れる形状・基準点・構造プロファイルと、その既定値・数値の範囲・使える出力形式（STEP が使えるか）を返します。",
+      "command": "capabilities",
+      "access": "read",
+      "input_schema": {"type": "object", "properties": {}, "additionalProperties": false},
+      "output_schema": {"type": "object", "required": ["shapes", "defaults", "limits", "formats", "step_available"]},
+      "timeout_seconds": 60
+    },
+    {
+      "name": "generate",
+      "title": "寸法を指定して箱・タイル・ベースフレームを作る",
+      "description": "寸法と構造を指定して Gridfinity の箱（box）・壁なしタイル（tile）・ベースフレームのみ（baseplate_only）を作り、保存先に書き出します。寸法は実寸 mm（width_mm / depth_mm）か、ユニット数＋追加 mm（1U = 42 mm。*_units / *_extra_mm）で指定します。外周クリアランスは全体寸法から差し引かれます。structure_profile を選ぶと、壁厚・床厚・角丸・ベースフレーム形式・はがれ防止耳の既定値が画面と同じ値になります（lightweight: 1.9 / 0.225 / 4.0 / lightweight / 耳あり、robust: 1.2 / 1.2 / 1.5 / robust / 耳なし）。出力は <name>_container / _baseplate / _set（3MF）と、_parameters.json・_validation.json・_layout.svg です。同じ名前のファイルが1つでもあれば、overwrite を指定しない限り何も書きません。",
+      "command": "generate",
+      "access": "write",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "name": {"type": "string", "minLength": 1, "maxLength": 60, "description": "作品名。ファイル名の先頭になる"},
+          "output_folder": {"type": "string", "minLength": 3, "maxLength": 1000, "x-path": "output_folder",
+                            "description": "書き出し先フォルダー（絶対パス）"},
+          "shape": {"type": "string", "enum": ["box", "tile", "baseplate_only"], "default": "box",
+                    "description": "box = 箱／トレー、tile = 壁なしタイル／かさ上げ台、baseplate_only = ベースフレームのみ"},
+          "dimension_input_mode": {"type": "string", "enum": ["millimeters", "units_plus_mm"], "default": "millimeters"},
+          "width_mm": {"type": "number", "minimum": 0, "maximum": 600, "description": "横幅 X（millimeters のとき必須）"},
+          "depth_mm": {"type": "number", "minimum": 0, "maximum": 600, "description": "奥行 Y（millimeters のとき必須）"},
+          "width_units": {"type": "integer", "minimum": 0, "maximum": 14, "description": "横幅のユニット数（units_plus_mm のとき必須）"},
+          "width_extra_mm": {"type": "number", "minimum": 0, "maximum": 600, "description": "横幅の追加 mm（units_plus_mm。既定 0）"},
+          "depth_units": {"type": "integer", "minimum": 0, "maximum": 14, "description": "奥行のユニット数（units_plus_mm のとき必須）"},
+          "depth_extra_mm": {"type": "number", "minimum": 0, "maximum": 600, "description": "奥行の追加 mm（units_plus_mm。既定 0）"},
+          "height_mm": {"type": "number", "minimum": 4.75, "maximum": 300, "default": 21.0,
+                        "description": "完成高さ。画面のプリセットは 7 / 14 / 21 / 28 / 35 / 42"},
+          "anchor": {"type": "string", "enum": ["left_back", "right_back", "left_front", "right_front"], "default": "left_back",
+                     "description": "基準点。部分セルは基準点の反対側に寄る"},
+          "wall_back": {"type": "boolean", "default": true, "description": "奥の壁（box のときだけ）"},
+          "wall_right": {"type": "boolean", "default": true, "description": "右の壁（box のときだけ）"},
+          "wall_front": {"type": "boolean", "default": true, "description": "手前の壁（box のときだけ）"},
+          "wall_left": {"type": "boolean", "default": true, "description": "左の壁（box のときだけ）"},
+          "structure_profile": {"type": "string", "enum": ["lightweight", "robust", "custom"], "default": "lightweight",
+                                "description": "lightweight = 軽量・共有シリーズ準拠、robust = しっかり・v1.1.5、custom = 個別指定"},
+          "base_frame_style": {"type": "string", "enum": ["lightweight", "robust"],
+                               "description": "ベースフレーム形式。省略時は structure_profile に合わせる"},
+          "clearance_total_mm": {"type": "number", "minimum": 0, "maximum": 5, "default": 0.4},
+          "wall_thickness_mm": {"type": "number", "minimum": 0.4, "maximum": 5, "description": "省略時は structure_profile の値"},
+          "floor_thickness_mm": {"type": "number", "minimum": 0.16, "maximum": 5, "description": "省略時は structure_profile の値"},
+          "corner_radius_mm": {"type": "number", "minimum": 0, "maximum": 20, "description": "省略時は structure_profile の値"},
+          "min_partial_cell_mm": {"type": "number", "minimum": 4, "maximum": 42, "default": 12.0,
+                                  "description": "これより細い部分セルには底の凸形状を付けない"},
+          "anti_warp_ears": {"type": "boolean",
+                             "description": "四隅のはがれ防止耳（軽量ベースフレームだけ）。省略時は structure_profile の値"},
+          "ear_thickness_mm": {"type": "number", "minimum": 0.12, "maximum": 1, "default": 0.2},
+          "ear_width_mm": {"type": "number", "minimum": 1, "maximum": 8, "default": 3.0},
+          "ear_length_mm": {"type": "number", "minimum": 3, "maximum": 25, "default": 13.0},
+          "generate_baseplate": {"type": "boolean", "default": true, "description": "対応するベースフレームも作る"},
+          "formats": {"type": "array", "items": {"type": "string", "enum": ["3mf", "stl", "step"]}, "default": ["3mf"],
+                      "description": "step は CadQuery があるときだけ（get_capabilities の step_available）"},
+          "overwrite": {"type": "boolean", "default": false}
+        },
+        "required": ["name", "output_folder"],
+        "additionalProperties": false
+      },
+      "output_schema": {"type": "object", "required": ["status", "files", "finished_mm", "meshes", "watertight"],
+                        "properties": {"status": {"type": "string", "enum": ["READY"]}, "files": {"type": "array"}}},
+      "timeout_seconds": 600,
+      "cancellable": true
+    },
+    {
+      "name": "generate_from_preset",
+      "title": "保存済みプリセットから作る",
+      "description": "画面で保存したプリセット JSON を読み、その設定のまま箱・ベースフレームを作って保存先に書き出します。プリセットは読むだけで変更しません。プリセットに書かれた出力先は使わず、output_folder に保存します。出力形式もプリセットの設定に従います。同じ名前のファイルが1つでもあれば、overwrite を指定しない限り何も書きません。",
+      "command": "generate_from_preset",
+      "access": "write",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "preset": {"type": "string", "minLength": 3, "maxLength": 1000, "x-path": "media_file", "x-suffixes": [".json"],
+                     "description": "プリセット JSON（絶対パス）。読むだけ"},
+          "output_folder": {"type": "string", "minLength": 3, "maxLength": 1000, "x-path": "output_folder",
+                            "description": "書き出し先フォルダー（絶対パス）"},
+          "overwrite": {"type": "boolean", "default": false}
+        },
+        "required": ["preset", "output_folder"],
+        "additionalProperties": false
+      },
+      "output_schema": {"type": "object", "required": ["status", "files", "finished_mm", "meshes", "watertight"],
+                        "properties": {"status": {"type": "string", "enum": ["READY"]}, "files": {"type": "array"}}},
+      "timeout_seconds": 600,
+      "cancellable": true
+    }
+  ],
+  "health_check": {"action": "get_capabilities"},
+  "requirements": {
+    "python": ">=3.10,<3.14",
+    "packages": ["numpy", "shapely>=2.1", "trimesh>=4.4"],
+    "optional_packages": ["cadquery (STEP only)"],
+    "setup": "setup.bat creates .venv",
+    "local_ai": []
+  },
+  "data_policy": {
+    "presets": "read_only",
+    "network": "none",
+    "runtime_download": false
+  }
+}
