@@ -47,7 +47,9 @@ ANCHORS = ("left_back", "right_back", "left_front", "right_front")
 DIMENSION_MODES = ("millimeters", "units_plus_mm")
 PROFILES = ("lightweight", "robust", "custom")
 BASE_FRAME_STYLES = ("lightweight", "robust")
-FORMATS = ("3mf", "stl", "step")
+# この入口で出せるのは、実機で検証した 3MF / STL だけ。
+# STEP は画面からは出せる（CadQuery があるとき）が、入口では未検証なので出さない。
+FORMATS = ("3mf", "stl")
 HEIGHT_PRESETS_MM = (7, 14, 21, 28, 35, 42)
 
 # 構造プロファイルを選んだときに画面が入れる値（app.py _profile_selected と同じ）。
@@ -114,7 +116,7 @@ def _step_available() -> bool:
 def capabilities(args: dict) -> dict:
     if args:
         raise CliError("invalid_arguments", "capabilities に引数はありません。")
-    formats = ["3mf", "stl"] + (["step"] if _step_available() else [])
+    formats = list(FORMATS)
     return {
         "tool": "gridfinity-customizer-jp",
         "version": __version__,
@@ -132,14 +134,16 @@ def capabilities(args: dict) -> dict:
         "limits": {k: list(v) for k, v in LIMITS.items()},
         "connector_limits": list(CONNECTOR_LIMIT),
         "formats": formats,
-        "step_available": "step" in formats,
+        "step_available": False,
+        "step": {"offered": False, "cadquery_installed": _step_available(),
+                 "note": "STEP はこの入口では未検証のため出力しない。必要なら画面から出力する。"},
         "outputs": ["<name>_container.*（箱）", "<name>_baseplate.*（ベースフレーム）",
                     "<name>_set.3mf（箱とベースを並べたもの）", "<name>_parameters.json",
                     "<name>_validation.json", "<name>_layout.svg"],
         "notes": ["外周クリアランスは、指定した全体寸法から差し引いて完成寸法になる",
                   "旧版（v1.1.5 以前）のプリセットは、しっかり版として読み込まれる",
                   "connector_limits の上限はこの入口だけの制限（アプリ本体には上限なし）",
-                  "STEP は CadQuery が入っているときだけ使える"],
+                  "STEP はこの入口では出力しない（未検証）。画面からは CadQuery があれば出せる"],
     }
 
 
@@ -202,9 +206,6 @@ def _formats(args: dict) -> list[str]:
     if not isinstance(formats, list) or not formats or len(set(formats)) != len(formats) \
             or set(formats) - set(FORMATS):
         raise CliError("invalid_arguments", f"formats は {list(FORMATS)} から重複なく選びます。")
-    if "step" in formats and not _step_available():
-        raise CliError("step_unavailable",
-                       "STEP には CadQuery が必要です（install_step.bat）。3mf / stl を選んでください。")
     return formats
 
 
@@ -327,8 +328,10 @@ def _produce(settings: GenerationSettings, folder: Path, overwrite: bool, notes:
     if settings.requested_width_mm > MAX_REQUESTED_MM or settings.requested_depth_mm > MAX_REQUESTED_MM \
             or settings.height_mm > LIMITS["height_mm"][1]:
         raise CliError("invalid_dimensions", "寸法が入口の上限を超えています（capabilities の limits）。")
-    if settings.export_step and not _step_available():
-        raise CliError("step_unavailable", "STEP には CadQuery が必要です（install_step.bat）。")
+    if settings.export_step:
+        raise CliError("step_not_offered",
+                       "このプリセットは STEP を出力する設定です。この入口では検証済みの 3MF / STL だけを"
+                       "出力します。STEP は画面から出力してください。")
 
     started = time.time()
     base = safe_name(settings.name)

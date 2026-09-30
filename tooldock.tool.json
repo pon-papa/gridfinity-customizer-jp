@@ -4,7 +4,7 @@
   "name": "Gridfinity Customizer JP",
   "version": "1.2.1",
   "api_version": 1,
-  "description": "半端な寸法に対応した Gridfinity の箱・タイル・ベースフレーム（格子枠）を作り、3MF / STL（CadQuery があれば STEP）を書き出すローカルツール。画面と同じ生成処理を使います。",
+  "description": "半端な寸法に対応した Gridfinity の箱・タイル・ベースフレーム（格子枠）を作り、3MF / STL を書き出すローカルツール。画面と同じ生成処理を使います。",
   "namespace": "gridfinity",
   "interface": {
     "type": "json_cli",
@@ -14,7 +14,7 @@
     "output": "envelope",
     "progress": "none"
   },
-  "capabilities": ["gridfinity_box", "gridfinity_tile", "gridfinity_baseplate", "export_3mf", "export_stl", "export_step_optional"],
+  "capabilities": ["gridfinity_box", "gridfinity_tile", "gridfinity_baseplate", "export_3mf", "export_stl"],
   "actions": [
     {
       "name": "get_capabilities",
@@ -71,8 +71,8 @@
           "ear_width_mm": {"type": "number", "minimum": 1, "maximum": 8, "default": 3.0},
           "ear_length_mm": {"type": "number", "minimum": 3, "maximum": 25, "default": 13.0},
           "generate_baseplate": {"type": "boolean", "default": true, "description": "対応するベースフレームも作る"},
-          "formats": {"type": "array", "items": {"type": "string", "enum": ["3mf", "stl", "step"]}, "default": ["3mf"],
-                      "description": "step は CadQuery があるときだけ（get_capabilities の step_available）"},
+          "formats": {"type": "array", "items": {"type": "string", "enum": ["3mf", "stl"]}, "default": ["3mf"],
+                      "description": "検証済みの 3MF / STL。STEP はこの入口では出力しない"},
           "overwrite": {"type": "boolean", "default": false}
         },
         "required": ["name", "output_folder"],
@@ -86,7 +86,7 @@
     {
       "name": "generate_from_preset",
       "title": "保存済みプリセットから作る",
-      "description": "画面で保存したプリセット JSON を読み、その設定のまま箱・ベースフレームを作って保存先に書き出します。プリセットは読むだけで変更しません。プリセットに書かれた出力先は使わず、output_folder に保存します。出力形式もプリセットの設定に従います。同じ名前のファイルが1つでもあれば、overwrite を指定しない限り何も書きません。",
+      "description": "画面で保存したプリセット JSON を読み、その設定のまま箱・ベースフレームを作って保存先に書き出します。プリセットは読むだけで変更しません。プリセットに書かれた出力先は使わず、output_folder に保存します。出力形式もプリセットの設定に従います（STEP を含む設定は step_not_offered で断ります）。同じ名前のファイルが1つでもあれば、overwrite を指定しない限り何も書きません。",
       "command": "generate_from_preset",
       "access": "write",
       "input_schema": {
@@ -111,7 +111,6 @@
   "requirements": {
     "python": ">=3.10,<3.14",
     "packages": ["numpy", "shapely>=2.1", "trimesh>=4.4"],
-    "optional_packages": ["cadquery (STEP only)"],
     "setup": "setup.bat creates .venv",
     "local_ai": []
   },

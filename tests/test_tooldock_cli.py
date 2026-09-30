@@ -105,7 +105,7 @@ class CapabilitiesTest(unittest.TestCase):
         self.assertEqual(set(res["shapes"]), {"box", "tile", "baseplate_only"})
         self.assertIn("3mf", res["formats"])
         self.assertIn("stl", res["formats"])
-        self.assertEqual(res["step_available"], "step" in res["formats"])
+        self.assertNotIn("step", res["formats"])
         self.assertEqual(res["structure_profiles"]["robust"]["wall_thickness_mm"], 1.2)
 
     def test_capabilities_takes_no_arguments(self):
@@ -169,14 +169,20 @@ class GenerateTest(Base):
         self.assertNotIn("container", kinds)
         self.assertIn("baseplate", kinds)
 
-    def test_step_only_when_cadquery_is_present(self):
+    def test_step_is_not_offered(self):
+        """STEP は未検証なので、CadQuery の有無にかかわらず入口からは出さない。"""
         code, reply = self.generate(name="step", formats=["step"])
-        if tooldock_cli._step_available():
-            self.assertEqual(code, 0, reply)
-            self.assertTrue(any(f["format"] == "step" for f in reply["result"]["files"]))
-        else:
-            self.assertEqual(reply["error"]["code"], "step_unavailable")
-            self.assertEqual(list(self.out.iterdir()), [])
+        self.assertEqual(reply["error"]["code"], "invalid_arguments")
+        preset = json.loads(SAMPLE.read_text(encoding="utf-8"))
+        preset["export_step"] = True
+        p = self.tmp / "step preset.json"
+        p.write_text(json.dumps(preset, ensure_ascii=False), encoding="utf-8")
+        code, reply = run("generate_from_preset", {"preset": str(p), "output_folder": str(self.out)})
+        self.assertEqual(reply["error"]["code"], "step_not_offered")
+        self.assertEqual(list(self.out.iterdir()), [])
+        caps = run("capabilities", {})[1]["result"]
+        self.assertEqual((caps["formats"], caps["step_available"], caps["step"]["offered"]),
+                         (["3mf", "stl"], False, False))
 
     def test_same_geometry_as_the_existing_cli(self):
         """入口は画面・既存 CLI と同じ生成処理を使う（STL がバイト一致）。"""
